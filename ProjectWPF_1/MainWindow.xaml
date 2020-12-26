@@ -5,15 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProjectWPF_1"
         mc:Ignorable="d"
-        x:Name="Form" Title="Би-2" Height="450" Width="800">
+        x:Name="Form" Closing="Form_Closing" Title="Би-2" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="9*"></RowDefinition>
             <RowDefinition Height="0.5*"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <MediaElement x:Name="player" LoadedBehavior="Manual" Grid.Row="0" Source="C:\Users\PODGORNOV\Downloads\bi-2-bowie_247224.mp4"></MediaElement>
-        <Slider x:Name="PositionSlider" Grid.Row="1" PreviewMouseUp="PositionSlider_PreviewMouseUp" PreviewMouseDown="PositionSlider_PreviewMouseDown"></Slider>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="15" x:Name="PlayListColumn"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <MediaElement x:Name="player" LoadedBehavior="Manual" Grid.Row="0" Source="C:\Users\PODGORNOV\Downloads\bi-2-bowie_247224.mp4"></MediaElement>
+            <ListBox x:Name="PlayList" Grid.Column="1" SelectionChanged="PlayList_SelectionChanged" MouseEnter="PlayList_MouseEnter" MouseLeave="PlayList_MouseLeave">  </ListBox>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="10*"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="TimeLabelBegin" FontSize = "12" Margin ="0,-3,0,0" >00:00</Label>
+            <Label x:Name="TimeLabelEnd" Grid.Column ="2" FontSize = "12" Margin ="0,-3,0,0" >00:00</Label>
+            <Slider Grid.Column="1" x:Name="PositionSlider" Grid.Row="1" PreviewMouseUp="PositionSlider_PreviewMouseUp" PreviewMouseDown="PositionSlider_PreviewMouseDown"></Slider>
+        </Grid>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
@@ -23,7 +40,7 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0">Prew</Button>
+            <Button  Grid.Column="0" Click="Button_Click_2">Prew</Button>
             <Button x:Name="PlayButton" Grid.Column="1" Click="PlayButton_Click">Pause</Button>
             <Button Grid.Column="2" Click="Button_Click"/>
             <StackPanel Grid.Column="4">
@@ -32,7 +49,7 @@
             </StackPanel>
 
             <Button x:Name="OpenButton" Click="OpenButton_Click" Grid.Column="3">Open</Button>
-            <Button Grid.Column="5">Next</Button>
+            <Button Grid.Column="5" Click="Button_Click_1">Next</Button>
         </Grid>
     </Grid>
 </Window>

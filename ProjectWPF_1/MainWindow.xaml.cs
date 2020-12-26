@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 
 namespace ProjectWPF_1
 {
@@ -27,12 +28,28 @@ namespace ProjectWPF_1
             VolumeSlider.Value = 0.5;
             player.Stop();
             Task.Factory.StartNew(videoDuration);
+            try
+            {
+                int i = 0;
+                while(!reader.EndOfStream)
+                {
+                    fileNames[i] = reader.ReadLine();
+                    PlayList.Items.Add(fileNames[i])
+                }
+            }
+            catch
+            {
+
+            }
+
         }
 
         bool isPlayng = true;
         Task sliderMove;
         bool isSliderMove = false;
         string[] fileNames;
+        int index = 0;
+
 
         /// <summary>
         /// старт/стоп проигрователя
@@ -71,15 +88,20 @@ namespace ProjectWPF_1
         void videoDuration()
         {
             Duration duration = new Duration();
-            Dispatcher.Invoke(new Action(()=>{ duration = player.NaturalDuration; }));
+            Dispatcher.Invoke(new Action(() => { duration = player.NaturalDuration; }));
 
             while (duration.HasTimeSpan == false)
             {
                 Dispatcher.Invoke(new Action(() => { duration = player.NaturalDuration; }));
             }
             TimeSpan timeSpan = duration.TimeSpan;
-            //MessageBox.Show(timeSpan.TotalSeconds.ToString());
             Dispatcher.Invoke(new Action(() => { PositionSlider.Maximum = timeSpan.TotalSeconds; }));
+            Dispatcher.Invoke(new Action(() =>
+            {
+                TimeLabelEnd.Content = (PositionSlider.Value / 60).ToString() + ":"
+                            + Convert.ToInt32(PositionSlider.Value % 60).ToString();
+            }));
+
         }
 
         void SliderMove()
@@ -92,6 +114,9 @@ namespace ProjectWPF_1
                     Dispatcher.Invoke(new Action(() =>
                     {
                         PositionSlider.Value = player.Position.TotalSeconds;
+                        TimeLabelBegin.Content = (PositionSlider.Value / 60).ToString() + ":"
+                        + Convert.ToInt32(PositionSlider.Value%60).ToString();
+                        
                     }));
                 }
             }
@@ -104,6 +129,7 @@ namespace ProjectWPF_1
 
             if (openFileDialog.ShowDialog() == true)
             {
+                index = 0;
                 player.Stop();
                 isPlayng = false;
                 PlayButton.Content = "Play";
@@ -112,6 +138,11 @@ namespace ProjectWPF_1
                 fileNames = openFileDialog.FileNames;
                 Form.Title = openFileDialog.FileName;
                 Task.Factory.StartNew(videoDuration);
+                PlayList.Items.Clear();
+                foreach(string name in fileNames)
+                {
+                    PlayList.Items.Add(name.Remove(0,name.LastIndexOf("\\")+1));
+                }
             }
         }
 
@@ -125,6 +156,70 @@ namespace ProjectWPF_1
         private void PositionSlider_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             isSliderMove = true;
+        }
+
+        void SetSourse(int index)
+        {
+            player.Stop();
+            isPlayng = false;
+            PlayButton.Content = "Play";
+            try
+            {
+                Form.Title = fileNames[index];
+                player.Source = new Uri(fileNames[PlayList.SelectedIndex]);
+            }
+            catch
+            {
+            }
+        }
+
+        private void PlayList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PlayList.SelectedIndex >= 0)
+            {
+                SetSourse(PlayList.SelectedIndex);
+            }
+        }
+
+        private void PlayList_MouseEnter(object sender, MouseEventArgs e)
+        {
+            PlayListColumn.Width = new GridLength(200);
+        }
+
+        private void PlayList_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PlayListColumn.Width = new GridLength(15);
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            index++;
+            if(index == PlayList.Items.Count)
+            {
+                index = 0;
+            }
+            PlayList.SelectedIndex = index;
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            index--;
+            if (index == -1)
+            {
+                index = PlayList.Items.Count - 1;
+            }
+            PlayList.SelectedIndex = index;
+        }
+
+        private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            StreamWriter streamWriter = new StreamWriter("playlist");
+
+            foreach(string name in fileNames)
+            {
+                streamWriter.WriteLine(name);
+            }
+            streamWriter.Close();
         }
     }
 }
